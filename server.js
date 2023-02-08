@@ -1,31 +1,45 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
-const app = express();
-let allow = ["http://locgialhost:3000", "future deployed frontend"];
+const { readdirSync } = require("fs");
+const dotenv = require("dotenv");
+dotenv.config();
 
-function options(req, res) {
-  let temp;
-  let origin = req.header("origin");
-  if (allow.indexOf(origin) > -1) {
-    temp = { origin: true, succesStatus: 200 };
-    return res(null, tmp);
-  }
-  temp = {
-    origin: "nope",
-  };
-  return res(null, tmp);
-}
+const app = express();
+app.use(express.json());
+
+// let allow = ["http://locgialhost:3000", "future deployed frontend"];
+// function options(req, res) {
+//   let temp;
+//   let origin = req.header("origin");
+//   if (allow.indexOf(origin) > -1) {
+//     temp = { origin: true, succesStatus: 200 };
+//     return res(null, tmp);
+//   }
+//   temp = {
+//     origin: "nope",
+//   };
+//   return res(null, tmp);
+// }
 // const options = {
 //   origin: "http://locgialhost:3000",
 //   sucessStatus: 200,
 // };
+app.use(cors());
 
-app.use(cors(options));
+// console.log(readdirSync("./routes"));
 
-app.get("/", (req, res) => {
-  res.send("home");
-});
+//routes
+readdirSync("./routes").map((r) => app.use("/", require("./routes/" + r)));
 
-app.listen(8000, () => {
-  console.log("server is listening...");
+//database
+mongoose.set("strictQuery", false);
+mongoose
+  .connect(process.env.DATABASE_ENDPOINT, { useNewUrlParser: true })
+  .then(() => console.log("succesfully connected to database"))
+  .catch((err) => console.log(err));
+
+const port = process.env.PORT || 8000;
+app.listen(port, () => {
+  console.log("server is runninng on port" + port);
 });
