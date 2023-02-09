@@ -8,23 +8,19 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// let allow = ["http://locgialhost:3000", "future deployed frontend"];
-// function options(req, res) {
-//   let temp;
-//   let origin = req.header("origin");
-//   if (allow.indexOf(origin) > -1) {
-//     temp = { origin: true, succesStatus: 200 };
-//     return res(null, tmp);
-//   }
-//   temp = {
-//     origin: "nope",
-//   };
-//   return res(null, tmp);
-// }
-// const options = {
-//   origin: "http://locgialhost:3000",
-//   sucessStatus: 200,
-// };
+let allow = ["http://locgialhost:3000", "future deployed frontend"];
+function options(req, res) {
+  let temp;
+  let origin = req.header("origin");
+  if (allow.indexOf(origin) > -1) {
+    temp = { origin: true, succesStatus: 200 };
+    return res(null, tmp);
+  }
+  temp = {
+    origin: "nope",
+  };
+  return res(null, tmp);
+}
 app.use(cors());
 
 // console.log(readdirSync("./routes"));
