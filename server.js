@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-let allow = ["http://locgialhost:3000", "future deployed frontend"];
+let allow = ["http://locallhost:3000", "future deployed frontend"];
 function options(req, res) {
   let temp;
   let origin = req.header("origin");
