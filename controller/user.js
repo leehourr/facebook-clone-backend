@@ -1,8 +1,13 @@
-const { validateEmail, validateLength } = require("../helpers/validation");
+const {
+  validateEmail,
+  validateLength,
+  validateUsername,
+} = require("../helpers/validation");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { generateToken } = require("../helpers/jwtToken");
+const { sendVerificationEmail } = require("../helpers/mailer");
 
 exports.register = async (req, res) => {
   try {
@@ -23,11 +28,12 @@ exports.register = async (req, res) => {
         message: "invalid email address",
       });
     }
+
     const check = await User.findOne({ email });
     if (check) {
       return res.status(400).json({
         message:
-          "This email address already exists,try with a different email address",
+          "This email address is already existed, Try with a different email address",
       });
     }
 
@@ -50,19 +56,20 @@ exports.register = async (req, res) => {
     const cryptedPassword = await bcrypt.hash(password, 12);
     // console.log(cryptedPassword);
     let tempUsername = first_name + last_name;
-    let newUsername = await validateUsername(tempUsername);
+    let userName = await validateUsername(tempUsername);
 
     const user = await new User({
       first_name,
       last_name,
       email,
       password: cryptedPassword,
-      username: newUsername,
+      username: userName,
       bYear,
       bMonth,
       bDay,
       gender,
     }).save();
+
     const emailVerificationToken = generateToken(
       { id: user.id.toString() },
       "1d"
@@ -75,7 +82,7 @@ exports.register = async (req, res) => {
     const url = `${process.env.BASE_URL}/activate/${emailVerificationToken}`;
     sendVerificationEmail(user.email, user.first_name, url);
     const token = generateToken({ id: user._id.toString() }, "7d");
-    res.send({
+    res.status(200).json({
       id: user._id,
       username: user.username,
       picture: user.picture,
@@ -92,7 +99,7 @@ exports.register = async (req, res) => {
 
 exports.activateAccount = async (req, res) => {
   const { token } = req.body;
-  const user = jwt.verify(token, process.env.TOKEN_SECRET);
+  const user = jwt.verify(token, process.env.SECRET_KEY);
   const check = await User.findById(user.id);
   if (check.verified === true) {
     return res.status(400).json({ message: "This email is already activated" });
@@ -120,7 +127,8 @@ exports.login = async (req, res) => {
       });
     }
     const token = generateToken({ id: user._id.toString() }, "7d");
-    res.send({
+    res.status(200).json({
+      statCode: 200,
       id: user._id,
       username: user.username,
       picture: user.picture,

@@ -8,7 +8,19 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-let allow = ["http://locallhost:3000", "future deployed frontend"];
+const currentDate = new Date();
+const pickedDate = new Date(2009, 2 - 1, 11);
+const startDate = new Date(1970, 0, 1);
+const underage = new Date(1984, 0, 1);
+
+let age = currentDate - pickedDate;
+
+console.log(age);
+console.log(underage - startDate);
+
+console.log(age > underage ? true : false);
+
+let allow = ["http://localhost:3000", "future deployed frontend"];
 function options(req, res) {
   let temp;
   let origin = req.header("origin");
