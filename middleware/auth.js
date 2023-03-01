@@ -5,14 +5,17 @@ exports.authUser = async (req, res, next) => {
     let tmp = req.header("Authorization");
 
     const token = tmp ? tmp.slice(7, tmp.length) : "";
+
     if (!token) {
       return res.status(400).json({ message: "Invalid Authentification" });
     }
-    jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+    // return res.status(200).json({ message: token });
+    jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
       if (err) {
         return res.status(400).json({ message: "Invalid Authentification" });
       }
-      req.user = user;
+      res.locals.user = user;
+      console.log("in middleware", user);
       next();
     });
   } catch (error) {

@@ -83,6 +83,7 @@ exports.register = async (req, res) => {
     sendVerificationEmail(user.email, user.first_name, url);
     const token = generateToken({ id: user._id.toString() }, "7d");
     res.status(200).json({
+      statCode: 200,
       id: user._id,
       username: user.username,
       picture: user.picture,
@@ -143,7 +144,42 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.getUserData = async (req, res) => {
+  try {
+    // let tmp = req.header("Authorization");
+    return res.status(200).json({ message: "yes" });
+
+    // const token = tmp ? tmp.slice(7, tmp.length) : "";
+    // if (!token) {
+    //   return res.status(400).json({ message: "Invalid Authentification" });
+    // }
+    // jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
+    //   if (err) {
+    //     return res.status(400).json({ message: "Invalid Authentification" });
+    //   }
+    //   req.user = user;
+    //   next();
+    // });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.auth = async (req, res) => {
-  console.log(req.body());
-  
+  // console.log(res.locals.user);
+  try {
+    const id = res.locals.user.id;
+    const user = await User.findById(id);
+    return res.status(200).json({ user_data: user });
+
+    // User.findById(id, function (err, userData) {
+    //   if (err) {
+    //     console.log(err);
+    //   }
+    //   return res.status(200), json({ user_data: userData });
+    // });
+    // return res.status(200).json({ message: user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
