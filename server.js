@@ -43,7 +43,9 @@ readdirSync("./routes").map((r) => app.use("/", require("./routes/" + r)));
 //database
 mongoose.set("strictQuery", false);
 mongoose
-  .connect(process.env.DATABASE_ENDPOINT, { useNewUrlParser: true })
+  .connect(process.env.DATABASE_ENDPOINT, {
+    useNewUrlParser: true,
+  })
   .then(() => console.log("succesfully connected to database"))
   .catch((err) => console.log(err));
 

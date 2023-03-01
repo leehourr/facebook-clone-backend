@@ -142,3 +142,8 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.auth = async (req, res) => {
+  console.log(req.body());
+  
+};
