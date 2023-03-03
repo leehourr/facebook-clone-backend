@@ -7,7 +7,9 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { generateToken } = require("../helpers/jwtToken");
-const { sendVerificationEmail } = require("../helpers/mailer");
+const { sendVerificationEmail, sendResetCode } = require("../helpers/mailer");
+const Code = require("../models/Code");
+const { generateCode } = require("../helpers/generateCode");
 
 exports.register = async (req, res) => {
   try {
@@ -172,5 +174,24 @@ exports.findUser = async (req, res) => {
     return res.status(400).json({ message: "No Search Results" });
   } catch (err) {
     return res.status(500).json({ message: err.message });
+  }
+};
+
+exports.sendResetPasswordCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email }).select("-password");
+    await Code.findOneAndRemove({ user: user._id });
+    const code = generateCode(5);
+    await new Code({
+      code,
+      user: user._id,
+    }).save();
+    sendResetCode(user.email, user.first_name, code);
+    return res.status(200).json({
+      message: "Email reset code has been sent to your email",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
