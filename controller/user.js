@@ -237,11 +237,14 @@ exports.changePassword = async (req, res) => {
   const { email, password } = req.body;
 
   const cryptedPassword = await bcrypt.hash(password, 12);
-  await User.findOneAndUpdate(
+  const user = await User.findOneAndUpdate(
     { email },
     {
       password: cryptedPassword,
     }
   );
-  return res.status(200).json({ message: "ok" });
+  const token = generateToken({ id: user._id.toString() }, "7d");
+  return res.status(200).json({
+    token: token,
+  });
 };
