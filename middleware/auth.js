@@ -9,12 +9,13 @@ exports.authUser = async (req, res, next) => {
     if (!token) {
       return res.status(400).json({ message: "Invalid Authentification" });
     }
+
     // return res.status(200).json({ message: token });
     jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
       if (err) {
         return res.status(400).json({ message: "Invalid Authentification" });
       }
-      res.locals.user = user;
+      res.user = user;
       console.log("in middleware", user);
       next();
     });

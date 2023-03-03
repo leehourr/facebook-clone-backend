@@ -83,15 +83,7 @@ exports.register = async (req, res) => {
     sendVerificationEmail(user.email, user.first_name, url);
     const token = generateToken({ id: user._id.toString() }, "7d");
     res.status(200).json({
-      statCode: 200,
-      id: user._id,
-      username: user.username,
-      picture: user.picture,
-      first_name: user.first_name,
-      last_name: user.last_name,
       token: token,
-      verified: user.verified,
-      message: "Register Success ! please activate your email to start",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -129,15 +121,7 @@ exports.login = async (req, res) => {
     }
     const token = generateToken({ id: user._id.toString() }, "7d");
     res.status(200).json({
-      statCode: 200,
-      id: user._id,
-      username: user.username,
-      picture: user.picture,
-      first_name: user.first_name,
-      last_name: user.last_name,
       token: token,
-      verified: user.verified,
-      message: "Login success",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -161,25 +145,32 @@ exports.getUserData = async (req, res) => {
     //   next();
     // });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 exports.auth = async (req, res) => {
   // console.log(res.locals.user);
+  // console.log(res.user.id);
+  // return res.status(200).json({ uid: res.user.id, token: req.body.token });
   try {
-    const id = res.locals.user.id;
+    const id = res.user.id;
     const user = await User.findById(id);
-    return res.status(200).json({ user_data: user });
-
-    // User.findById(id, function (err, userData) {
-    //   if (err) {
-    //     console.log(err);
-    //   }
-    //   return res.status(200), json({ user_data: userData });
-    // });
-    // return res.status(200).json({ message: user });
+    if (id) return res.status(200).json({ user_data: user });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+exports.resetPass = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const foundUser = await User.findOne({ email });
+    if (foundUser) {
+      return res.status(200).json({ data: foundUser });
+    }
+    return res.status(400).json({ message: "No Search Results" });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };

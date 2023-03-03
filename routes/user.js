@@ -4,6 +4,7 @@ const {
   activateAccount,
   login,
   auth,
+  resetPass,
 } = require("../controller/user");
 const { authUser } = require("../middleware/auth");
 
@@ -12,6 +13,7 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/activate", activateAccount);
 router.post("/login", login);
-router.post("/auth", authUser, auth);
+router.get("/auth", authUser, auth);
+router.post("/resetpass", resetPass);
 
 module.exports = router;
