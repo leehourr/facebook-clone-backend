@@ -182,7 +182,7 @@ exports.sendResetPasswordCode = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email }).select("-password");
     await Code.findOneAndRemove({ user: user._id });
-    const code = generateCode(5);
+    const code = generateCode(6);
     await new Code({
       code,
       user: user._id,
@@ -193,5 +193,42 @@ exports.sendResetPasswordCode = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.validateResetCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const containtLetters = /[a-zA-Z]/g;
+
+    if (containtLetters.test(code)) {
+      return res.status(403).json({
+        message:
+          "It looks like you entered some letters. Your code is 6 numbers long.",
+      });
+    }
+    if (code.length < 6) {
+      return res.status(403).json({
+        message: `You only entered ${code.length} numbers. Please check your code and try again.`,
+      });
+    }
+    if (code.length > 6) {
+      return res.status(403).json({
+        message:
+          "You entered more than 6 numbers. Please check your code and try again.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+    const Dbcode = await Code.findOne({ user: user._id });
+    if (Dbcode.code !== code) {
+      return res.status(400).json({
+        message:
+          "The number you entered doesn’t match your code. Please try again.",
+      });
+    }
+    return res.status(200).json({ message: "ok" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
