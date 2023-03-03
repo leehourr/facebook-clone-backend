@@ -162,7 +162,7 @@ exports.auth = async (req, res) => {
   }
 };
 
-exports.resetPass = async (req, res) => {
+exports.findUser = async (req, res) => {
   try {
     const { email } = req.body;
     const foundUser = await User.findOne({ email });
