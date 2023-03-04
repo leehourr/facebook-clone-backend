@@ -2,6 +2,7 @@ const fs = require("fs");
 
 module.exports = async function (req, res, next) {
   try {
+    // console.log(Object.values(req.files).flat());
     if (!req.files || Object.values(req.files).flat().length === 0) {
       return res.status(400).json({ message: "No files selected." });
     }
@@ -10,6 +11,7 @@ module.exports = async function (req, res, next) {
       if (
         file.mimetype !== "image/jpeg" &&
         file.mimetype !== "image/png" &&
+        file.mimetype !== "image/jpg" &&
         file.mimetype !== "image/gif" &&
         file.mimetype !== "image/webp"
       ) {

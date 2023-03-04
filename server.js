@@ -1,24 +1,18 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const fileUpload = require("express-fileupload");
 const { readdirSync } = require("fs");
 const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-
-const currentDate = new Date();
-const pickedDate = new Date(2009, 2 - 1, 11);
-const startDate = new Date(1970, 0, 1);
-const underage = new Date(1984, 0, 1);
-
-let age = currentDate - pickedDate;
-
-console.log(age);
-console.log(underage - startDate);
-
-console.log(age > underage ? true : false);
+app.use(
+  fileUpload({
+    useTempFiles: true,
+  })
+);
 
 let allow = ["http://localhost:3000", "future deployed frontend"];
 function options(req, res) {
