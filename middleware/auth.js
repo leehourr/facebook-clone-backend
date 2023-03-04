@@ -16,7 +16,7 @@ exports.authUser = async (req, res, next) => {
         return res.status(400).json({ message: "Invalid Authentification" });
       }
       res.user = user;
-      console.log("in middleware", user);
+      // console.log("in middleware", user);
       next();
     });
   } catch (error) {
