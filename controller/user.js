@@ -10,6 +10,7 @@ const { generateToken } = require("../helpers/jwtToken");
 const { sendVerificationEmail, sendResetCode } = require("../helpers/mailer");
 const Code = require("../models/Code");
 const { generateCode } = require("../helpers/generateCode");
+const Post = require("../models/Post");
 
 exports.register = async (req, res) => {
   try {
@@ -253,7 +254,12 @@ exports.getProfile = async (req, res) => {
   try {
     const { username } = req.params;
     const profile = await User.find({ username }).select("-password");
-    res.json(profile);
+    const userPf = profile[0];
+    const posts = await Post.find({ user: userPf?._id });
+    if (profile.length === 0) {
+      return res.status(400).json({ message: "User not found" });
+    }
+    return res.json({ profile: userPf, posts });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
