@@ -159,7 +159,9 @@ exports.auth = async (req, res) => {
   try {
     const id = res.user.id;
     const user = await User.findById(id);
-    if (id) return res.status(200).json({ user_data: user });
+    const posts = await Post.find({ user: id });
+
+    if (id) return res.status(200).json({ user_data: user, posts });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -255,7 +257,7 @@ exports.getProfile = async (req, res) => {
     const { username } = req.params;
     const profile = await User.find({ username }).select("-password");
     const userPf = profile[0];
-    const posts = await Post.find({ user: userPf?._id });
+    const posts = await Post.find();
     if (profile.length === 0) {
       return res.status(400).json({ message: "User not found" });
     }
