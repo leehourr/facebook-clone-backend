@@ -11,6 +11,7 @@ const { sendVerificationEmail, sendResetCode } = require("../helpers/mailer");
 const Code = require("../models/Code");
 const { generateCode } = require("../helpers/generateCode");
 const Post = require("../models/Post");
+const mongoose = require("mongoose");
 
 exports.register = async (req, res) => {
   try {
@@ -159,7 +160,11 @@ exports.auth = async (req, res) => {
   try {
     const id = res.user.id;
     const user = await User.findById(id);
-    const posts = await Post.find({ user: id });
+    const posts = await Post.find({
+      user: mongoose.Types.ObjectId(user._id),
+    })
+      .populate("user", "first_name last_name picture username gender")
+      .sort({ createdAt: -1 });
 
     if (id) return res.status(200).json({ user_data: user, posts });
   } catch (err) {
@@ -257,7 +262,12 @@ exports.getProfile = async (req, res) => {
     const { username } = req.params;
     const profile = await User.find({ username }).select("-password");
     const userPf = profile[0];
-    const posts = await Post.find();
+
+    const posts = await Post.find({
+      user: mongoose.Types.ObjectId(userPf._id),
+    })
+      .populate("user", "first_name last_name picture username gender")
+      .sort({ createdAt: -1 });
     if (profile.length === 0) {
       return res.status(400).json({ message: "User not found" });
     }
