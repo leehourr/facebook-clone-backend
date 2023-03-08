@@ -9,6 +9,7 @@ const {
   validateResetCode,
   changePassword,
   getProfile,
+  updateProfilePicture,
 } = require("../controller/user");
 const { authUser } = require("../middleware/auth");
 
@@ -23,5 +24,6 @@ router.post("/sendResetPasswordCode", sendResetPasswordCode);
 router.post("/validateResetCode", validateResetCode);
 router.post("/newpassword", changePassword);
 router.get("/:username", authUser, getProfile);
+router.put("/updateProfilePicture", authUser, updateProfilePicture);
 
 module.exports = router;
