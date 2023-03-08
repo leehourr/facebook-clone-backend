@@ -281,10 +281,10 @@ exports.updateProfilePicture = async (req, res) => {
   try {
     const { url } = req.body;
 
-    await User.findByIdAndUpdate(req.user.id, {
+    await User.findByIdAndUpdate(res.user.id, {
       picture: url,
     });
-    res.json(url);
+    return res.status(200).json({ url: req.body.url });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
