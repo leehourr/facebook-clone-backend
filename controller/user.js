@@ -282,7 +282,7 @@ exports.getProfile = async (req, res) => {
     const { username } = req.params;
     const user = await User.findById(res.user.id);
     const profile = await User.findOne({ username }).select("-password");
-    const friendship = {
+    let friendship = {
       friends: false,
       following: false,
       requestSent: false,
@@ -298,7 +298,7 @@ exports.getProfile = async (req, res) => {
     ) {
       friendship.friends = true;
     }
-    if (user.following.includes(profile._id)) {
+    if (profile.followers.includes(user._id)) {
       friendship.following = true;
     }
     if (user.requests.includes(profile._id)) {
@@ -312,7 +312,7 @@ exports.getProfile = async (req, res) => {
       .populate("user")
       .sort({ createdAt: -1 });
 
-    res.json({ ...profile.toObject(), posts, friendship });
+    res.json({ profile, posts, friendship });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -333,8 +333,8 @@ exports.updateProfilePicture = async (req, res) => {
 
 exports.addFriend = async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) {
-      const sender = await User.findById(req.user.id);
+    if (res.user.id !== req.params.id) {
+      const sender = await User.findById(res.user.id);
       const receiver = await User.findById(req.params.id);
       if (
         !receiver.requests.includes(sender._id) &&
@@ -349,7 +349,10 @@ exports.addFriend = async (req, res) => {
         await sender.updateOne({
           $push: { following: sender._id },
         });
-        res.json({ message: "friend request has been sent" });
+        return res.json({
+          status: "ok",
+          message: "friend request has been sent",
+        });
       } else {
         return res.status(400).json({ message: "Already sent" });
       }
@@ -365,8 +368,8 @@ exports.addFriend = async (req, res) => {
 
 exports.unFriend = async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) {
-      const sender = await User.findById(req.user.id);
+    if (res.user.id !== req.params.id) {
+      const sender = await User.findById(res.user.id);
       const receiver = await User.findById(req.params.id);
       if (
         receiver.friends.includes(sender._id) &&
@@ -386,7 +389,7 @@ exports.unFriend = async (req, res) => {
             followers: receiver._id,
           },
         });
-        res.json({ message: "Unfriend success" });
+        res.json({ status: "ok", message: "Unfriend success" });
       } else {
         return res.status(400).json({ message: "Already sent" });
       }
@@ -402,8 +405,8 @@ exports.unFriend = async (req, res) => {
 
 exports.cancelRequest = async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) {
-      const sender = await User.findById(req.user.id);
+    if (res.user.id !== req.params.id) {
+      const sender = await User.findById(res.user.id);
       const receiver = await User.findById(req.params.id);
       if (
         receiver.requests.includes(sender._id) &&
@@ -418,7 +421,10 @@ exports.cancelRequest = async (req, res) => {
         await sender.updateOne({
           $pull: { following: sender._id },
         });
-        res.json({ message: "you successfully canceled request" });
+        res.json({
+          status: "ok",
+          message: "you successfully canceled request",
+        });
       } else {
         return res.status(400).json({ message: "Already Canceled" });
       }
@@ -434,8 +440,8 @@ exports.cancelRequest = async (req, res) => {
 
 exports.deleteRequest = async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) {
-      const receiver = await User.findById(req.user.id);
+    if (res.user.id !== req.params.id) {
+      const receiver = await User.findById(res.user.id);
       const sender = await User.findById(req.params.id);
       if (receiver.requests.includes(sender._id)) {
         await receiver.update({
@@ -450,7 +456,7 @@ exports.deleteRequest = async (req, res) => {
           },
         });
 
-        res.json({ message: "delete request accepted" });
+        res.json({ status: "ok", message: "delete request accepted" });
       } else {
         return res.status(400).json({ message: "Already deleted" });
       }
@@ -464,8 +470,8 @@ exports.deleteRequest = async (req, res) => {
 
 exports.follow = async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) {
-      const sender = await User.findById(req.user.id);
+    if (res.user.id !== req.params.id) {
+      const sender = await User.findById(res.user.id);
       const receiver = await User.findById(req.params.id);
       if (
         !receiver.followers.includes(sender._id) &&
@@ -478,7 +484,7 @@ exports.follow = async (req, res) => {
         await sender.updateOne({
           $push: { following: receiver._id },
         });
-        res.json({ message: "follow success" });
+        res.json({status:"ok", message: "follow success" });
       } else {
         return res.status(400).json({ message: "Already following" });
       }
@@ -492,8 +498,8 @@ exports.follow = async (req, res) => {
 
 exports.unfollow = async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) {
-      const sender = await User.findById(req.user.id);
+    if (res.user.id !== req.params.id) {
+      const sender = await User.findById(res.user.id);
       const receiver = await User.findById(req.params.id);
       if (
         receiver.followers.includes(sender._id) &&
@@ -504,9 +510,9 @@ exports.unfollow = async (req, res) => {
         });
 
         await sender.updateOne({
-          $pull: { following: sender._id },
+          $pull: { following: receiver._id },
         });
-        res.json({ message: "unfollow success" });
+        res.json({ status: "ok", message: "unfollow success" });
       } else {
         return res.status(400).json({ message: "Already not following" });
       }
@@ -520,8 +526,8 @@ exports.unfollow = async (req, res) => {
 
 exports.acceptRequest = async (req, res) => {
   try {
-    if (req.user.id !== req.params.id) {
-      const receiver = await User.findById(req.user.id);
+    if (res.user.id !== req.params.id) {
+      const receiver = await User.findById(res.user.id);
       const sender = await User.findById(req.params.id);
       if (receiver.requests.includes(sender._id)) {
         await receiver.update({
@@ -533,7 +539,7 @@ exports.acceptRequest = async (req, res) => {
         await receiver.updateOne({
           $pull: { requests: sender._id },
         });
-        res.json({ message: "friend request accepted" });
+        res.json({ status: "ok", message: "friend request accepted" });
       } else {
         return res.status(400).json({ message: "Already friends" });
       }

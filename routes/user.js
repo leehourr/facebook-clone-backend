@@ -10,6 +10,13 @@ const {
   changePassword,
   getProfile,
   updateProfilePicture,
+  addFriend,
+  cancelRequest,
+  follow,
+  unfollow,
+  acceptRequest,
+  deleteRequest,
+  unFriend,
 } = require("../controller/user");
 const { authUser } = require("../middleware/auth");
 
@@ -30,5 +37,7 @@ router.put("/cancelRequest/:id", authUser, cancelRequest);
 router.put("/follow/:id", authUser, follow);
 router.put("/unfollow/:id", authUser, unfollow);
 router.put("/acceptRequest/:id", authUser, acceptRequest);
+router.put("/unfriend/:id", authUser, unFriend);
+router.put("/deleteRequest/:id", authUser, deleteRequest);
 
 module.exports = router;
