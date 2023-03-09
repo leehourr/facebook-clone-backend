@@ -257,21 +257,62 @@ exports.changePassword = async (req, res) => {
   });
 };
 
+// exports.getProfile = async (req, res) => {
+//   try {
+//     const { username } = req.params;
+//     const profile = await User.find({ username }).select("-password");
+//     const userPf = profile[0];
+
+//     const posts = await Post.find({
+//       user: mongoose.Types.ObjectId(userPf._id),
+//     })
+//       .populate("user", "first_name last_name picture username gender")
+//       .sort({ createdAt: -1 });
+//     if (profile.length === 0) {
+//       return res.status(400).json({ message: "User not found" });
+//     }
+//     return res.json({ profile: userPf, posts });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 exports.getProfile = async (req, res) => {
   try {
     const { username } = req.params;
-    const profile = await User.find({ username }).select("-password");
-    const userPf = profile[0];
-
-    const posts = await Post.find({
-      user: mongoose.Types.ObjectId(userPf._id),
-    })
-      .populate("user", "first_name last_name picture username gender")
-      .sort({ createdAt: -1 });
-    if (profile.length === 0) {
-      return res.status(400).json({ message: "User not found" });
+    const user = await User.findById(res.user.id);
+    const profile = await User.findOne({ username }).select("-password");
+    const friendship = {
+      friends: false,
+      following: false,
+      requestSent: false,
+      requestReceived: false,
+    };
+    if (!profile) {
+      return res.json({ ok: false });
     }
-    return res.json({ profile: userPf, posts });
+
+    if (
+      user.friends.includes(profile._id) &&
+      profile.friends.includes(user._id)
+    ) {
+      friendship.friends = true;
+    }
+    if (user.following.includes(profile._id)) {
+      friendship.following = true;
+    }
+    if (user.requests.includes(profile._id)) {
+      friendship.requestReceived = true;
+    }
+    if (profile.requests.includes(user._id)) {
+      friendship.requestSent = true;
+    }
+
+    const posts = await Post.find({ user: profile._id })
+      .populate("user")
+      .sort({ createdAt: -1 });
+
+    res.json({ ...profile.toObject(), posts, friendship });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
