@@ -4,19 +4,19 @@ const { ObjectId } = mongoose.Schema;
 
 const reactionShema = new mongoose.Schema(
   {
-    type: {
+    react: {
       type: String,
-      enum: ["Haha", "Laugh", "Sad", "Like", "Angry"],
-      default: null,
+      enum: ["haha", "laugh", "sad", "like", "angry", "wow"],
+      require: true,
+    },
+    postRef: {
+      type: ObjectId,
+      ref: "Post",
     },
 
-    user: {
+    reactBy: {
       type: ObjectId,
       ref: "User",
-      required: true,
-    },
-    background: {
-      type: String,
     },
   },
   {
