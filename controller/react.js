@@ -8,32 +8,32 @@ exports.reactPost = async (req, res) => {
       postRef: postId,
       reactBy: mongoose.Types.ObjectId(res.user.id),
     });
-    // if (check == null) {
-    //   const newReact = new React({
-    //     react: react,
-    //     postRef: postId,
-    //     reactBy: res.user.id,
-    //   });
-    //   await newReact.save();
-    //   return res.status(200).json({ status: "ok", message: "react success" });
-    // } else {
-    //   if (check.react == react) {
-    //     await React.findByIdAndRemove(check._id);
-    //     return res
-    //       .status(200)
-    //       .json({ status: "ok", message: "removed success" });
-    //   } else {
-    //     await React.findByIdAndUpdate(check._id, {
-    //       react: react,
-    //     });
-    //     return res
-    //       .status(200)
-    //       .json({ status: "ok", message: "update react success" });
-    //   }
-    // }
-    return res
-      .status(400)
-      .json({ status: "!ok", message: "update react success" });
+    if (check == null) {
+      const newReact = new React({
+        react: react,
+        postRef: postId,
+        reactBy: res.user.id,
+      });
+      await newReact.save();
+      return res.status(200).json({ status: "ok", message: "react success" });
+    } else {
+      if (check.react == react) {
+        await React.findByIdAndRemove(check._id);
+        return res
+          .status(200)
+          .json({ status: "ok", message: "removed success" });
+      } else {
+        await React.findByIdAndUpdate(check._id, {
+          react: react,
+        });
+        return res
+          .status(200)
+          .json({ status: "ok", message: "update react success" });
+      }
+    }
+    // return res
+    //   .status(400)
+    //   .json({ status: "!ok", message: "update react success" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
