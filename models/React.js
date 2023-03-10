@@ -6,7 +6,7 @@ const reactionShema = new mongoose.Schema(
   {
     react: {
       type: String,
-      enum: ["haha", "laugh", "sad", "like", "angry", "wow"],
+      enum: ["Haha", "Laugh", "Sad", "Like", "Angry", "Wow"],
       require: true,
     },
     postRef: {
