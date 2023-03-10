@@ -24,4 +24,4 @@ const reactionShema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Reaction", reactionShema);
+module.exports = mongoose.model("React", reactionShema);

@@ -419,7 +419,7 @@ exports.cancelRequest = async (req, res) => {
           $pull: { followers: sender._id },
         });
         await sender.updateOne({
-          $pull: { following: sender._id },
+          $pull: { following: receiver._id },
         });
         res.json({
           status: "ok",
@@ -484,7 +484,7 @@ exports.follow = async (req, res) => {
         await sender.updateOne({
           $push: { following: receiver._id },
         });
-        res.json({status:"ok", message: "follow success" });
+        res.json({ status: "ok", message: "follow success" });
       } else {
         return res.status(400).json({ message: "Already following" });
       }
