@@ -49,42 +49,53 @@ exports.getReacts = async (req, res) => {
       (x) => x.reactBy.toString() == req.user.id
     )?.react;
     */
-    const newReacts = reactsArray.reduce((group, react) => {
+    const reacts = reactsArray.reduce((group, react) => {
       let key = react["react"];
       group[key] = group[key] || [];
       group[key].push(react);
       return group;
     }, {});
 
-    const reacts = [
-      {
-        react: "like",
-        count: newReacts.like ? newReacts.like.length : 0,
-      },
-      {
-        react: "love",
-        count: newReacts.love ? newReacts.love.length : 0,
-      },
-      {
-        react: "haha",
-        count: newReacts.haha ? newReacts.haha.length : 0,
-      },
-      {
-        react: "sad",
-        count: newReacts.sad ? newReacts.sad.length : 0,
-      },
-      {
-        react: "wow",
-        count: newReacts.wow ? newReacts.wow.length : 0,
-      },
-      {
-        react: "angry",
-        count: newReacts.angry ? newReacts.angry.length : 0,
-      },
-    ];
-    reacts.sort((a, b) => {
-      return b.count - a.count;
-    });
+    // let reacts = [];
+    // reacts.push(newReacts);
+    // const reacts = [
+    //   {
+    //     react: "Like",
+    //     count: newReacts.like ? newReacts.like.length : 0,
+    //   },
+    //   {
+    //     react: "Love",
+    //     count: newReacts.love ? newReacts.love.length : 0,
+    //   },
+    //   {
+    //     react: "Haha",
+    //     count: newReacts.haha ? newReacts.haha.length : 0,
+    //   },
+    //   {
+    //     react: "Sad",
+    //     count: newReacts.sad ? newReacts.sad.length : 0,
+    //   },
+    //   {
+    //     react: "Wow",
+    //     count: newReacts.wow ? newReacts.wow.length : 0,
+    //   },
+    //   {
+    //     react: "Angry",
+    //     count: newReacts.angry ? newReacts.angry.length : 0,
+    //   },
+    // ];
+    // reacts.sort((a, b) => {
+    //   return b.count - a.count;
+    // });
+
+    // const finalReacts = reacts.reduce((group, react) => {
+    //   let count = react.count;
+    //   if (group[count] > 0) {
+    //     group["react"].push(react);
+    //   }
+    //   return group;
+    // }, []);
+
     const check = await React.findOne({
       postRef: req.params.id,
       reactBy: res.user.id,
@@ -98,5 +109,3 @@ exports.getReacts = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
-
