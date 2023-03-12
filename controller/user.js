@@ -160,6 +160,10 @@ exports.auth = async (req, res) => {
   try {
     const id = res.user.id;
     const user = await User.findById(id);
+    const search_history = await User.findById(res.user.id)
+      .select("search")
+      .populate("search.user", "picture first_name last_name username")
+      .sort({ createdAt: -1 });
     const posts = await Post.find({
       user: mongoose.Types.ObjectId(user._id),
     })
@@ -167,7 +171,8 @@ exports.auth = async (req, res) => {
       .populate("comments.commentBy", "picture first_name last_name username")
       .sort({ createdAt: -1 });
 
-    if (id) return res.status(200).json({ user_data: user, posts });
+    if (id)
+      return res.status(200).json({ user_data: user, posts, search_history });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -561,11 +566,12 @@ exports.search = async (req, res) => {
     const results = await User.find({ $text: { $search: searchTerm } }).select(
       "first_name last_name username picture"
     );
-    res.json(results);
+    return res.json(results);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 exports.addToSearchHistory = async (req, res) => {
   try {
     const { searchUser } = req.body;
@@ -573,12 +579,14 @@ exports.addToSearchHistory = async (req, res) => {
       user: searchUser,
       createdAt: new Date(),
     };
-    const user = await User.findById(req.user.id);
+
+    const user = await User.findById(res.user.id);
+
     const check = user.search.find((x) => x.user.toString() === searchUser);
     if (check) {
       await User.updateOne(
         {
-          _id: req.user.id,
+          _id: res.user.id,
           "search._id": check._id,
         },
         {
@@ -586,12 +594,40 @@ exports.addToSearchHistory = async (req, res) => {
         }
       );
     } else {
-      await User.findByIdAndUpdate(req.user.id, {
+      await User.findByIdAndUpdate(res.user.id, {
         $push: {
           search,
         },
       });
     }
+
+    return res.json({ message: "no users found", check, searchUser });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getSearchHistory = async (req, res) => {
+  try {
+    const search_history = await User.findById(res.user.id)
+      .select("search")
+      .populate("search.user", "picture first_name last_name username")
+      .sort({ createdAt: -1 });
+    return res.status(200).json(search_history.search);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+exports.removeFromSearch = async (req, res) => {
+  try {
+    const { searchUser } = req.body;
+    await User.updateOne(
+      {
+        _id: res.user.id,
+      },
+      { $pull: { search: { user: searchUser } } }
+    );
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
