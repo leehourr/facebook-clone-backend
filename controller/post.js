@@ -13,6 +13,7 @@ exports.getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find()
       .populate("user", "first_name last_name picture username gender")
+      .populate("comments.commentBy", "picture first_name last_name username")
       .sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
@@ -30,7 +31,7 @@ exports.comment = async (req, res) => {
           comments: {
             comment: comment,
             image: image,
-            commentBy: req.user.id,
+            commentBy: res.user.id,
           },
         },
       },

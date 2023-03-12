@@ -164,6 +164,7 @@ exports.auth = async (req, res) => {
       user: mongoose.Types.ObjectId(user._id),
     })
       .populate("user", "first_name last_name picture username gender")
+      .populate("comments.commentBy", "picture first_name last_name username")
       .sort({ createdAt: -1 });
 
     if (id) return res.status(200).json({ user_data: user, posts });
@@ -310,6 +311,7 @@ exports.getProfile = async (req, res) => {
 
     const posts = await Post.find({ user: profile._id })
       .populate("user")
+      .populate("comments.commentBy", "picture first_name last_name username")
       .sort({ createdAt: -1 });
 
     res.json({ profile, posts, friendship });
