@@ -14,20 +14,24 @@ app.use(
   })
 );
 
-let allow = ["http://localhost:3000", "future deployed frontend"];
+let allow = [
+  "http://localhost:3000",
+  "https://facebook-clone-side-project.web.app",
+];
 function options(req, res) {
   let temp;
-  let origin = req.header("origin");
+  let origin = req.header("Origin");
   if (allow.indexOf(origin) > -1) {
-    temp = { origin: true, succesStatus: 200 };
-    return res(null, tmp);
+    temp = { origin: true, optionSuccessStatus: 200 };
+    return res(null, temp);
   }
   temp = {
     origin: "nope",
   };
-  return res(null, tmp);
+  return res(null, temp);
 }
-app.use(cors());
+// options();
+app.use(cors(options));
 
 // console.log(readdirSync("./routes"));
 
